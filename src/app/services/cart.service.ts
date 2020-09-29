@@ -63,5 +63,47 @@ export class CartService {
       });
     }
   }
-  
+  addProductToCart(id: number, quantity?: number) {
+    this.productService.getProductById(id).subscribe(prod => {
+      // if cart is empty
+      if (this.cartDataServer.data[0].product === undefined) {
+        this.cartDataServer.data[0].product = prod;
+        this.cartDataServer.data[0].numInCart = quantity !== undefined ? quantity : 1;
+      // TODO calculate Total amount
+        this.cartDataClient.prodData[0].incart = this.cartDataServer.data[0].numInCart;
+        this.cartDataClient.prodData[0].incart = prod.id;
+        this.cartDataClient.total = this.cartDataServer.total;
+        localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
+        this.cartData$.next({... this.cartDataServer});
+      // TODO display a toast notification
+      } else {
+      // if cart has some items
+        let index = this.cartDataServer.data.findIndex(p => p.product.id === prod.id); // -1 or positive
+        if (index !== -1) {
+          if (quantity !== undefined && quantity <= prod.quantity) {
+            this.cartDataServer.data[index].numInCart = this.cartDataServer.data[index].numInCart < prod.quantity ? quantity : prod.quantity;
+          } else {
+            this.cartDataServer.data[index].numInCart = this.cartDataServer.data[index].numInCart < prod.quantity ? this.cartDataServer.data[index].numInCart++ : prod.quantity;
+          }
+          this.cartDataClient.prodData[index].incart = this.cartDataServer.data[index].numInCart;
+           // TODO display a toast notification
+        } else {
+          this.cartDataServer.data.push({
+            numInCart: 1,
+            product: prod,
+          });
+          this.cartDataClient.prodData.push({
+            incart: 1,
+            id: prod.id,
+          });
+          // TODO display a toast notification
+          // TODO calculate Total amount
+          this.cartDataClient.total = this.cartDataServer.total;
+          localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
+          this.cartData$.next({... this.cartDataServer});
+        }
+      }
+     
+    });
+  }
 }

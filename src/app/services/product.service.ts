@@ -14,7 +14,7 @@ export class ProductService {
   constructor(private http: HttpClient) { }
 
   getAllProducts(numberOfResults = 10): Observable<ServerResponse> {
-    return this.http.get<ServerResponse>(this.SERVER_URL + '/products', {
+    return this.http.get<ServerResponse>(this.SERVER_URL + '/products/', {
       params: {
         limit: numberOfResults.toString(),
       }

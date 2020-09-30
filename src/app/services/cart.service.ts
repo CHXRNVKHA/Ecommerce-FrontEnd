@@ -185,6 +185,10 @@ export class CartService {
     this.cartDataServer.total = total;
     this.cartTotal$.next(this.cartDataServer.total);
   }
+  private calculateSubTotal(index: number): number {
+    const p = this.cartDataServer.data[index];
+    return p.product.price * p.numInCart;
+  }
   checkoutFromCart(userId: number): void {
     this.http.post(`${this.serverURL}/orders/payment`, null).subscribe((res: {success: boolean}) => {
       if (res.success) {

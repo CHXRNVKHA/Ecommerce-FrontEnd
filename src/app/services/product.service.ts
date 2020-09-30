@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
+import { ProductModelServer, ServerResponse } from '../models/product.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,11 +13,19 @@ export class ProductService {
   private SERVER_URL = environment.SERVER_URL;
   constructor(private http: HttpClient) { }
 
-  getAllProducts(numberOfResults = 10): Observable<any> {
-    return this.http.get(this.SERVER_URL + '/products', {
+  getAllProducts(numberOfResults = 10): Observable<ServerResponse> {
+    return this.http.get<ServerResponse>(this.SERVER_URL + '/products', {
       params: {
         limit: numberOfResults.toString(),
       }
     });
+  }
+
+  getProductById(id: number): Observable<ProductModelServer> {
+    return this.http.get<ProductModelServer>(`${this.SERVER_URL}/products/${id}`);
+  }
+
+  getProductsByCategory(catName: string): Observable<ProductModelServer[]> {
+    return this.http.get<ProductModelServer[]>(`${this.SERVER_URL}/products/category/${catName}`);
   }
 }

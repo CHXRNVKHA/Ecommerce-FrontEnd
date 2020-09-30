@@ -151,6 +151,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "Ecommerce-FrontEnd"
+    }
+  },
+  "defaultProject": "Ecommerce-FrontEnd",
+  "cli": {
+    "analytics": false
+  }
 }

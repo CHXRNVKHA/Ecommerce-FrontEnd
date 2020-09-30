@@ -9,6 +9,8 @@ import { BehaviorSubject } from 'rxjs';
 import { NavigationExtras, Router } from '@angular/router';
 import { ProductModelServer } from './../models/product.model';
 import { throws } from 'assert';
+import { ToastrService } from 'ngx-toastr';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Injectable({
   providedIn: 'root'
@@ -37,7 +39,9 @@ export class CartService {
   constructor(private http: HttpClient,
               private productService: ProductService,
               private orderService: OrderService,
-              private router: Router) {
+              private router: Router,
+              private toast: ToastrService,
+              private spinner: NgxSpinnerService) {
     this.cartTotal$.next(this.cartDataServer.total);
     this.cartData$.next(this.cartDataServer);
     const info: CartModelPublic = JSON.parse(localStorage.getItem('cart'));
@@ -75,7 +79,12 @@ export class CartService {
         this.cartDataClient.total = this.cartDataServer.total;
         localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
         this.cartData$.next({... this.cartDataServer});
-      // TODO display a toast notification
+        this.toast.success(`{prod.name} add to the cart`, 'Product Added', {
+          timeOut: 1500,
+          progressBar: true,
+          progressAnimation: 'increasing',
+          positionClass: 'toast-top-right',
+        });
       } else {
       // if cart has some items
         const index = this.cartDataServer.data.findIndex(p => p.product.id === prod.id); // -1 or positive
@@ -86,7 +95,12 @@ export class CartService {
             this.cartDataServer.data[index].numInCart = this.cartDataServer.data[index].numInCart < prod.quantity ? this.cartDataServer.data[index].numInCart++ : prod.quantity;
           }
           this.cartDataClient.prodData[index].incart = this.cartDataServer.data[index].numInCart;
-           // TODO display a toast notification
+          this.toast.info(`{prod.name} quantity updated in the cart`, 'Product Updated', {
+            timeOut: 1500,
+            progressBar: true,
+            progressAnimation: 'increasing',
+            positionClass: 'toast-top-right',
+          });
         } else {
           this.cartDataServer.data.push({
             numInCart: 1,
@@ -96,7 +110,12 @@ export class CartService {
             incart: 1,
             id: prod.id,
           });
-          // TODO display a toast notification
+          this.toast.success(`{prod.name} add to the cart`, 'Product Added', {
+            timeOut: 1500,
+            progressBar: true,
+            progressAnimation: 'increasing',
+            positionClass: 'toast-top-right',
+          });
           // TODO calculate Total amount
           this.cartDataClient.total = this.cartDataServer.total;
           localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
@@ -178,7 +197,7 @@ export class CartService {
                   total: this.cartDataClient.total,
                 }
               };
-            // TODO HIDE SPINNER
+              this.spinner.hide().then();
               this.router.navigate(['/thankyou'], navigationExtras).then(p => {
                 this.cartDataClient = {total: 0, prodData: [{incart: 0, id: 0, }], };
                 this.cartTotal$.next(0);
@@ -186,6 +205,15 @@ export class CartService {
               });
             }
           });
+        });
+      } else {
+        this.spinner.hide().then();
+        this.router.navigateByUrl('/checkout').then();
+        this.toast.error(`Sorry, failed to book the order`, 'Order Status', {
+          timeOut: 1500,
+          progressBar: true,
+          progressAnimation: 'increasing',
+          positionClass: 'toast-top-right',
         });
       }
     });

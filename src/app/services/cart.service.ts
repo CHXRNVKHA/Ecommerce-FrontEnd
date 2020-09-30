@@ -45,13 +45,14 @@ export class CartService {
     this.cartTotal$.next(this.cartDataServer.total);
     this.cartData$.next(this.cartDataServer);
     const info: CartModelPublic = JSON.parse(localStorage.getItem('cart'));
-    if (info != null && info !== undefined && info.prodData[0].incart !== 0) {
+    if (info !== null && info !== undefined && info.prodData[0].incart !== 0) {
       this.cartDataClient = info;
       this.cartDataClient.prodData.forEach(p => {
         this.productService.getProductById(p.id).subscribe((actualProductInfo: ProductModelServer) => {
           if (this.cartDataServer.data[0].numInCart === 0) {
             this.cartDataServer.data[0].numInCart = p.incart;
             this.cartDataServer.data[0].product = actualProductInfo;
+            this.calculateTotal();
             this.cartDataClient.total = this.cartDataServer.total;
             localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
           } else {
@@ -59,6 +60,7 @@ export class CartService {
               numInCart: p.incart,
               product: actualProductInfo,
             });
+            this.calculateTotal();
             this.cartDataClient.total = this.cartDataServer.total;
             localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
           }
@@ -73,9 +75,9 @@ export class CartService {
       if (this.cartDataServer.data[0].product === undefined) {
         this.cartDataServer.data[0].product = prod;
         this.cartDataServer.data[0].numInCart = quantity !== undefined ? quantity : 1;
-      // TODO calculate Total amount
+        this.calculateTotal();
         this.cartDataClient.prodData[0].incart = this.cartDataServer.data[0].numInCart;
-        this.cartDataClient.prodData[0].incart = prod.id;
+        this.cartDataClient.prodData[0].id = prod.id;
         this.cartDataClient.total = this.cartDataServer.total;
         localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
         this.cartData$.next({... this.cartDataServer});
@@ -92,9 +94,12 @@ export class CartService {
           if (quantity !== undefined && quantity <= prod.quantity) {
             this.cartDataServer.data[index].numInCart = this.cartDataServer.data[index].numInCart < prod.quantity ? quantity : prod.quantity;
           } else {
-            this.cartDataServer.data[index].numInCart = this.cartDataServer.data[index].numInCart < prod.quantity ? this.cartDataServer.data[index].numInCart++ : prod.quantity;
+            this.cartDataServer.data[index].numInCart < prod.quantity ? this.cartDataServer.data[index].numInCart++ : prod.quantity;
           }
           this.cartDataClient.prodData[index].incart = this.cartDataServer.data[index].numInCart;
+          this.calculateTotal();
+          this.cartDataClient.total = this.cartDataServer.total;
+          localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
           this.toast.info(`{prod.name} quantity updated in the cart`, 'Product Updated', {
             timeOut: 1500,
             progressBar: true,
@@ -110,13 +115,14 @@ export class CartService {
             incart: 1,
             id: prod.id,
           });
+          localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
           this.toast.success(`{prod.name} add to the cart`, 'Product Added', {
             timeOut: 1500,
             progressBar: true,
             progressAnimation: 'increasing',
             positionClass: 'toast-top-right',
           });
-          // TODO calculate Total amount
+          this.calculateTotal();
           this.cartDataClient.total = this.cartDataServer.total;
           localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
           this.cartData$.next({... this.cartDataServer});
@@ -129,7 +135,7 @@ export class CartService {
     if (isIncrease) {
       data.numInCart < data.product.quantity ? data.numInCart++ : data.product.quantity;
       this.cartDataClient.prodData[index].incart = data.numInCart;
-      // TODO calculate Total amount
+      this.calculateTotal();
       this.cartDataClient.total = this.cartDataServer.total;
       localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
       this.cartData$.next({... this.cartDataServer});
@@ -141,7 +147,7 @@ export class CartService {
       } else {
         this.cartData$.next({... this.cartDataServer});
         this.cartDataClient.prodData[index].incart = data.numInCart;
-         // TODO calculate Total amount
+        this.calculateTotal();
         this.cartDataClient.total = this.cartDataServer.total;
         localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
       }
@@ -151,7 +157,7 @@ export class CartService {
     if (window.confirm('Are you sure you want to remove the item?')) {
       this.cartDataServer.data.splice(index, 1);
       this.cartDataClient.prodData.splice(index, 1);
-       // TODO calculate Total amount
+      this.calculateTotal();
       this.cartDataClient.total = this.cartDataServer.total;
       if (this.cartDataClient.total === 0) {
         this.cartDataClient = {total: 0, prodData: [{incart: 0, id: 0, }], };
@@ -197,7 +203,7 @@ export class CartService {
                   total: this.cartDataClient.total,
                 }
               };
-              this.spinner.hide().then();
+              this.spinner.hide();
               this.router.navigate(['/thankyou'], navigationExtras).then(p => {
                 this.cartDataClient = {total: 0, prodData: [{incart: 0, id: 0, }], };
                 this.cartTotal$.next(0);
@@ -207,7 +213,7 @@ export class CartService {
           });
         });
       } else {
-        this.spinner.hide().then();
+        this.spinner.hide();
         this.router.navigateByUrl('/checkout').then();
         this.toast.error(`Sorry, failed to book the order`, 'Order Status', {
           timeOut: 1500,

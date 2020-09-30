@@ -12,7 +12,7 @@ export class HeaderComponent implements OnInit {
   cartData: CartModelServer;
   cartTotal: number;
 
-  constructor(private cartService: CartService) { }
+  constructor(public cartService: CartService) { }
 
   ngOnInit(): void {
     this.cartService.cartTotal$.subscribe(total => this.cartTotal = total);

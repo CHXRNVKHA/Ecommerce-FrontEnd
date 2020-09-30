@@ -142,7 +142,7 @@ export class CartService {
     } else {
       data.numInCart--;
       if (data.numInCart < 1) {
-        // DELETE THE PRODUCT FROM CART
+        this.deleteProductFromCart(index);
         this.cartData$.next({... this.cartDataServer});
       } else {
         this.cartData$.next({... this.cartDataServer});

@@ -81,7 +81,7 @@ export class CartService {
         this.cartDataClient.total = this.cartDataServer.total;
         localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
         this.cartData$.next({... this.cartDataServer});
-        this.toast.success(`{prod.name} add to the cart`, 'Product Added', {
+        this.toast.success(`${prod.name} add to the cart`, 'Product Added', {
           timeOut: 1500,
           progressBar: true,
           progressAnimation: 'increasing',
@@ -100,7 +100,7 @@ export class CartService {
           this.calculateTotal();
           this.cartDataClient.total = this.cartDataServer.total;
           localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
-          this.toast.info(`{prod.name} quantity updated in the cart`, 'Product Updated', {
+          this.toast.info(`${prod.name} quantity updated in the cart`, 'Product Updated', {
             timeOut: 1500,
             progressBar: true,
             progressAnimation: 'increasing',
@@ -116,7 +116,7 @@ export class CartService {
             id: prod.id,
           });
           localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
-          this.toast.success(`{prod.name} add to the cart`, 'Product Added', {
+          this.toast.success(`${prod.name} add to the cart`, 'Product Added', {
             timeOut: 1500,
             progressBar: true,
             progressAnimation: 'increasing',

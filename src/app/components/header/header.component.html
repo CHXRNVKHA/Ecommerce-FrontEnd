@@ -69,8 +69,8 @@
 										<div class="qty">{{cartData.data[0].numInCart !== 0 ? cartData.data.length : 0}}</div>
 									</a>
 									<div class="cart-dropdown">
-										<div class="cart-list" *ngIf="cartData.data[0].numInCart !==0">
-											<div class="product-widget" *ngFor="let c of cartData; let i = index">
+										<div class="cart-list" *ngIf="cartData.data[0].numInCart !== 0">
+											<div class="product-widget" *ngFor="let c of cartData.data; let i = index">
 												<div class="product-img">
 													<img [src]="c.product?.image" alt="{{c.product.name}}" width="20px">
 												</div>
@@ -82,7 +82,7 @@
 											</div>
 										</div>
 										<div class="cart-summary">
-											<small>{{cartData.data[0].numInCart !== 0 ? cartData.length : 0}} Item(s) selected</small>
+											<small>{{cartData.data[0].numInCart !== 0 ? cartData.data.length : 0}} Item(s) selected</small>
 											<h5>TOTAL: {{cartTotal | currency: 'USD'}}</h5>
 										</div>
 										<div class="cart-btns">

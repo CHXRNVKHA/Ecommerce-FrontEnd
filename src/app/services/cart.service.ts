@@ -193,7 +193,7 @@ export class CartService {
     this.http.post(`${this.serverURL}/orders/payment`, null).subscribe((res: {success: boolean}) => {
       if (res.success) {
         this.resetServerData();
-        this.http.post(`${this.serverURL}/orders/new`, {
+        this.http.post(`${this.serverURL}/orders/add`, {
           userId: userId,
           products: this.cartDataClient.prodData,
         }).subscribe((data: OrderResponse) => {
